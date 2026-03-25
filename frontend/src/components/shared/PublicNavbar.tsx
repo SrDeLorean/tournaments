@@ -1,64 +1,77 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Trophy, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 
+const publicLinks = [
+  { name: "Torneos", href: "/torneos" }, // <--- ¡Nuevo enlace añadido aquí!
+  { name: "Partidos", href: "/partidos" },
+  { name: "Clasificación", href: "/clasificacion" },
+  { name: "Equipos", href: "/equipos" },
+  { name: "Jugadores", href: "/jugadores" },
+  { name: "TOTW / TOTS", href: "/totw" },
+  { name: "Infografía", href: "/infografia" },
+  { name: "Contacto", href: "/contacto" },
+]
 export function PublicNavbar() {
+  const pathname = usePathname()
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center transition-transform group-hover:rotate-12">
-            <Trophy className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-black tracking-tighter uppercase italic">
+          <Trophy className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+          <span className="text-xl font-black italic uppercase tracking-tighter text-foreground">
             Tourney<span className="text-primary">OS</span>
           </span>
         </Link>
 
-        {/* LINKS DESKTOP */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-wide">
-          <Link href="/tournaments" className="text-muted-foreground hover:text-primary transition-colors">Torneos</Link>
-          <Link href="/rankings" className="text-muted-foreground hover:text-primary transition-colors">Rankings</Link>
-          <Link href="/teams" className="text-muted-foreground hover:text-primary transition-colors">Equipos</Link>
-        </nav>
-
-        {/* ACCIONES */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="ghost" className="font-bold">INGRESAR</Button>
-            </Link>
-            <Link href="/register">
-              <Button className="font-black italic shadow-lg shadow-primary/20">UNIRSE</Button>
-            </Link>
-          </div>
-
-          {/* MENU MÓVIL (Solo icono) */}
-          <div className="md:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
+        {/* ENLACES DE NAVEGACIÓN (Desktop) */}
+        <div className="hidden lg:flex items-center gap-1">
+          {publicLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href)
+            return (
+              <Link key={link.name} href={link.href}>
+                <Button 
+                  variant="ghost" 
+                  className={cn(
+                    "text-[11px] font-bold uppercase tracking-widest transition-all h-9 px-4 rounded-full",
+                    isActive 
+                      ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  {link.name}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild><Link href="/tournaments">Torneos</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/rankings">Rankings</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/login">Iniciar Sesión</Link></DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              </Link>
+            )
+          })}
         </div>
+
+        {/* BOTONES DE ACCIÓN (Login / Registro) */}
+        <div className="hidden lg:flex items-center gap-3">
+          <Link href="/login">
+            <Button variant="ghost" className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+              Ingresar
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button className="text-xs font-black italic uppercase tracking-widest">
+              Unirse a la Liga
+            </Button>
+          </Link>
+        </div>
+
+        {/* MENÚ MÓVIL */}
+        <Button variant="ghost" size="icon" className="lg:hidden text-muted-foreground">
+          <Menu className="h-6 w-6" />
+        </Button>
       </div>
-    </header>
+    </nav>
   )
 }

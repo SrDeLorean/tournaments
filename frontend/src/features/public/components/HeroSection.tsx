@@ -24,7 +24,7 @@ export function HeroSection() {
 
         {/* TITULAR PRINCIPAL */}
         <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase italic leading-[0.9]">
-          Lleva a <span className="text-primary drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]">Successors</span> <br />
+          Lleva a <span className="text-primary drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]">Tu equipo</span> <br />
           al siguiente nivel
         </h1>
 

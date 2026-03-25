@@ -1,24 +1,16 @@
 // src/app/(public)/layout.tsx
 import { PublicNavbar } from "@/components/shared/PublicNavbar"
 
-export default function PublicLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 relative">
       
-      {/* NAVBAR */}
       <PublicNavbar />
-
-      {/* MAIN */}
-      <main className="flex-1 pt-[88px] md:pt-[96px]">
+      
+      <main className="relative z-10 flex-1">
         {children}
       </main>
-
-      {/* OPCIONAL: FOOTER FUTURO */}
-      {/* <PublicFooter /> */}
+      
     </div>
   )
 }

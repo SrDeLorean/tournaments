@@ -1,9 +1,16 @@
+import { TeamManagement } from "@/features/teams/components/TeamManagement"
+
 export default function ManagerPage() {
+  // Aquí luego haremos el fetch a PHP: SELECT * FROM players WHERE team_id = 'my_team'
+  const myPlayers = [] 
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Gestión de Equipo</h1>
-      <p className="text-muted-foreground">Administra tu roster, invita jugadores y gestiona inscripciones.</p>
-      {/* Aquí irá el componente de Roster Table */}
+    <div className="max-w-6xl mx-auto">
+      <TeamManagement 
+        teamName="Successors" 
+        players={myPlayers} 
+        isGlobalAdmin={false} 
+      />
     </div>
   )
 }

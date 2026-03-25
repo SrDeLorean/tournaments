@@ -8,32 +8,49 @@ import { DashboardNavbar } from "@/components/shared/DashboardNavbar"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { 
-  Trophy, 
-  Users, 
   LayoutDashboard, 
-  ShieldCheck, 
-  UserCircle, 
-  Settings,
-  CalendarDays,
+  Users, 
   History,
-  LogOut
+  LogOut,
+  ShieldAlert,
+  UserCog,
+  ShieldCheck,
+  ClipboardList,
+  CalendarRange,
+  Trophy,
+  Medal,
+  CalendarDays,
+  ArrowRightLeft
 } from "lucide-react"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { role, username, logout } = useUserStore()
 
-  // Definición de navegación base (Para todos)
+  // --- RUTAS BASE (Para todos) ---
   const mainNav = [
     { name: "Inicio", href: "/player", icon: LayoutDashboard },
-    { name: "Calendario", href: "#", icon: CalendarDays },
+    { name: "Mi Calendario", href: "/player/calendar", icon: CalendarDays },
+  ]
+
+  // --- RUTAS ADMIN ---
+  const adminNav = [
+    { name: "Panel Root", href: "/admin", icon: ShieldAlert, exact: true },
+    { name: "Usuarios", href: "/admin/users", icon: UserCog },
+    { name: "Equipos", href: "/admin/teams", icon: ShieldCheck },
+    { name: "Plantillas", href: "/admin/rosters", icon: ClipboardList },
+    { name: "Temporadas", href: "/admin/seasons", icon: CalendarRange },
+    { name: "Competencias", href: "/admin/competitions", icon: Trophy },
+    { name: "Temp. Competencias", href: "/admin/season-competitions", icon: Medal },
+    { name: "Calendarios", href: "/admin/calendars", icon: CalendarDays },
+    { name: "Traspasos", href: "/admin/transfers", icon: ArrowRightLeft },
   ]
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* --- SIDEBAR IZQUIERDO --- */}
-      <aside className="hidden w-64 flex-col border-r bg-card/50 backdrop-blur-md md:flex">
-        <div className="p-6">
+      <aside className="hidden w-64 flex-col border-r bg-card/50 backdrop-blur-md md:flex overflow-y-auto">
+        <div className="p-6 shrink-0">
           <div className="flex items-center gap-2 px-2 mb-6">
             <Trophy className="h-6 w-6 text-primary" />
             <h2 className="text-xl font-black tracking-tighter uppercase italic">
@@ -43,59 +60,71 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <TeamSwitcher />
         </div>
         
-        <Separator className="mx-6 w-auto mb-4 opacity-50" />
+        <Separator className="mx-6 w-auto mb-4 opacity-50 shrink-0" />
         
-        <nav className="flex-1 space-y-1 px-4">
+        <nav className="flex-1 space-y-1 px-4 pb-6">
           <p className="px-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
             Menú Principal
           </p>
           
-          {/* Renderizado de links base */}
           {mainNav.map((item) => (
             <NavLink key={item.name} item={item} active={pathname === item.href} />
           ))}
 
-          {/* SECCIÓN MANAGER: Solo visible para Manager y Admin */}
+          {/* SECCIÓN MANAGER */}
           {(role === "manager" || role === "admin") && (
             <div className="pt-4">
               <p className="px-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
-                Gestión E-Sports
+                Gestión Deportiva
               </p>
               <NavLink 
                 item={{ name: "Mi Roster", href: "/manager", icon: Users }} 
                 active={pathname === "/manager"} 
               />
               <NavLink 
-                item={{ name: "Historial", href: "#", icon: History }} 
-                active={pathname === "/history"} 
+                item={{ name: "Historial", href: "/manager/history", icon: History }} 
+                active={pathname === "/manager/history"} 
               />
             </div>
           )}
 
-          {/* SECCIÓN ADMIN: Solo para el Admin */}
+          {/* SECCIÓN ADMIN */}
           {role === "admin" && (
             <div className="pt-4">
               <p className="px-3 text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-3">
-                Sistema
+                Administración Global
               </p>
-              <Link
-                href="/admin"
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition-all italic uppercase",
-                  pathname === "/admin" 
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20" 
-                    : "text-orange-500/70 hover:bg-orange-500/10 hover:text-orange-500"
-                )}
-              >
-                <ShieldCheck className="h-4 w-4" />
-                Panel Root
-              </Link>
+              <div className="space-y-1">
+                {adminNav.map((item) => {
+                  // Si es exact: true (como el /admin base), validamos igualdad estricta.
+                  // Si no, usamos startsWith para que se mantenga activo si entras a sub-rutas.
+                  const isActive = item.exact 
+                    ? pathname === item.href 
+                    : pathname.startsWith(item.href);
+
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold transition-all italic uppercase tracking-wider",
+                        isActive 
+                          ? "bg-orange-500 text-white shadow-md shadow-orange-500/20" 
+                          : "text-orange-500/70 hover:bg-orange-500/10 hover:text-orange-500"
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           )}
         </nav>
 
         {/* FOOTER DEL SIDEBAR */}
-        <div className="p-4 mt-auto border-t bg-secondary/20">
+        <div className="p-4 border-t bg-secondary/20 shrink-0">
           <div className="mb-4 px-3 py-2 rounded-lg bg-background/50 border border-border/50">
             <p className="text-[10px] text-muted-foreground uppercase font-bold">Sesión</p>
             <p className="text-xs font-black truncate text-primary uppercase italic">{username || "Invitado"}</p>
@@ -103,15 +132,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <button 
             onClick={() => {
-              // Añadimos una pequeña confirmación para evitar cierres accidentales
-              if(confirm("¿Estás seguro de que quieres salir?")) {
-                logout();
-              }
+              if(window.confirm("¿Cerrar sesión segura?")) logout();
             }}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all uppercase italic"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-500/10 transition-colors uppercase italic"
           >
             <LogOut className="h-4 w-4" />
-            Cerrar Sesión
+            Salir
           </button>
         </div>
       </aside>
@@ -127,13 +153,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   )
 }
 
-// Sub-componente para los links (para no repetir código)
+// Sub-componente de navegación base
 function NavLink({ item, active }: { item: any, active: boolean }) {
   return (
     <Link
       href={item.href}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group",
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 group",
         active 
           ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
           : "text-muted-foreground hover:bg-secondary hover:text-foreground"
