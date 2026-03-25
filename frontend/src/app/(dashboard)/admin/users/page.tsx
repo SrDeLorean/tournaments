@@ -19,32 +19,22 @@ import {
 import { cn } from "@/lib/utils"
 
 export default function AdminUsersPage() {
-  // 1. Estados para búsqueda, filtro de rol y paginación
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "manager" | "player">("all")
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10 // Máximo de usuarios por página
+  const itemsPerPage = 10 
 
-  // 2. Aplicamos filtros de Búsqueda y Rol
   const filteredUsers = MOCK_USERS.filter((user) => {
     const matchesSearch = 
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    
     const matchesRole = roleFilter === "all" || user.role === roleFilter
-
     return matchesSearch && matchesRole
   })
 
-  // 3. Lógica de Paginación Matemática
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
-  
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage, 
-    currentPage * itemsPerPage
-  )
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-  // 4. Funciones manejadoras (resetean a la página 1 para evitar errores)
   const handleSearch = (value: string) => {
     setSearchTerm(value)
     setCurrentPage(1)
@@ -56,11 +46,11 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500 pb-12">
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500 pb-12 text-foreground">
       
       {/* --- BOTÓN VOLVER --- */}
       <Link href="/admin">
-        <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-orange-500 font-bold text-xs uppercase tracking-widest px-0 mb-2">
+        <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-primary font-black text-[10px] uppercase tracking-widest px-0 mb-2 transition-colors">
           <ChevronLeft className="h-4 w-4" />
           Volver al Dashboard Root
         </Button>
@@ -69,12 +59,12 @@ export default function AdminUsersPage() {
       {/* --- CABECERA --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50 pb-6">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-orange-500/10 rounded-xl">
-            <UserCog className="h-8 w-8 text-orange-500" />
+          <div className="p-3 bg-primary/10 rounded-[var(--radius)]">
+            <UserCog className="h-8 w-8 text-primary" />
           </div>
           <div>
             <h1 className="text-3xl font-black uppercase italic tracking-tighter">
-              Cuentas del <span className="text-orange-500">Sistema</span>
+              Cuentas del <span className="text-primary">Sistema</span>
             </h1>
             <p className="text-sm text-muted-foreground font-medium mt-1">
               Gestiona accesos, roles y permisos de todos los usuarios.
@@ -82,27 +72,24 @@ export default function AdminUsersPage() {
           </div>
         </div>
         
-        <Button className="font-black italic uppercase tracking-widest bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20">
+        <Button className="font-black italic uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 rounded-[var(--radius)]">
           <UserPlus className="mr-2 h-4 w-4" />
           Crear Usuario
         </Button>
       </div>
 
-      {/* --- BARRA DE HERRAMIENTAS (Buscador y Filtros) --- */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card/30 p-4 rounded-2xl border border-border shadow-sm">
-        
-        {/* Buscador */}
+      {/* --- BARRA DE HERRAMIENTAS --- */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card/30 p-4 rounded-[var(--radius)] border border-border shadow-sm">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Buscar por usuario o email..." 
-            className="pl-9 bg-background border-border/50 italic placeholder:not-italic font-medium"
+            className="pl-9 bg-background border-border/50 italic placeholder:not-italic font-medium rounded-[var(--radius)]"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
           />
         </div>
 
-        {/* Filtros de Rol */}
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
           <Filter className="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
           {["all", "admin", "manager", "player"].map((role) => (
@@ -112,10 +99,10 @@ export default function AdminUsersPage() {
               size="sm"
               onClick={() => handleRoleChange(role as any)}
               className={cn(
-                "h-8 text-xs font-bold uppercase tracking-widest transition-all",
+                "h-8 text-[10px] font-black uppercase tracking-widest transition-all rounded-[calc(var(--radius)-4px)]",
                 roleFilter === role 
                   ? "bg-primary text-primary-foreground" 
-                  : "bg-background text-muted-foreground hover:text-foreground"
+                  : "bg-transparent text-muted-foreground hover:text-foreground border-border"
               )}
             >
               {role === "all" ? "Todos" : role}
@@ -125,62 +112,61 @@ export default function AdminUsersPage() {
       </div>
 
       {/* --- TABLA DE USUARIOS --- */}
-      <div className="rounded-2xl border border-border bg-card/30 overflow-hidden shadow-xl flex flex-col">
+      <div className="rounded-[var(--radius)] border border-border bg-card/30 overflow-hidden shadow-xl flex flex-col">
         <Table>
           <TableHeader className="bg-secondary/30">
-            <TableRow>
-              <TableHead className="w-[300px] font-black uppercase text-[10px] tracking-widest">Usuario</TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest">Nivel de Acceso</TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest">Organización</TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest">Estado</TableHead>
-              <TableHead className="w-[80px] text-right font-black uppercase text-[10px] tracking-widest">Acciones</TableHead>
+            <TableRow className="border-border/50">
+              <TableHead className="w-[300px] font-black uppercase text-[10px] tracking-widest text-muted-foreground">Usuario</TableHead>
+              <TableHead className="font-black uppercase text-[10px] tracking-widest text-muted-foreground text-center">Nivel de Acceso</TableHead>
+              <TableHead className="font-black uppercase text-[10px] tracking-widest text-muted-foreground text-center">Organización</TableHead>
+              <TableHead className="font-black uppercase text-[10px] tracking-widest text-muted-foreground text-center">Estado</TableHead>
+              <TableHead className="w-[80px] text-right font-black uppercase text-[10px] tracking-widest text-muted-foreground">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-muted-foreground font-medium italic">
-                  No se encontraron usuarios que coincidan con la búsqueda.
+                  No se encontraron usuarios.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedUsers.map((user) => (
-                <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
-                  
+                <TableRow key={user.id} className="hover:bg-muted/50 transition-colors border-border/50">
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border border-primary/20">
                         <AvatarImage src={user.avatar} />
-                        <AvatarFallback>{user.username[0]}</AvatarFallback>
+                        <AvatarFallback className="font-black bg-secondary">{user.username[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="font-black italic uppercase text-sm">{user.username}</span>
-                        <span className="text-[10px] text-muted-foreground">{user.email}</span>
+                        <span className="font-black italic uppercase text-sm tracking-tight">{user.username}</span>
+                        <span className="text-[10px] text-muted-foreground font-bold">{user.email}</span>
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="text-center">
                     <Badge variant="outline" className={cn(
-                      "text-[10px] uppercase font-black px-2 py-0.5 border-2",
-                      user.role === "admin" && "border-orange-500/50 text-orange-500 bg-orange-500/10",
-                      user.role === "manager" && "border-blue-500/50 text-blue-500 bg-blue-500/10",
-                      user.role === "player" && "border-primary/50 text-primary bg-primary/10"
+                      "text-[9px] uppercase font-black px-2 py-0.5 border-2 rounded-full",
+                      user.role === "admin" && "border-primary text-primary bg-primary/5",
+                      user.role === "manager" && "border-foreground/20 text-foreground bg-foreground/5",
+                      user.role === "player" && "border-muted-foreground/20 text-muted-foreground bg-muted-foreground/5"
                     )}>
                       {user.role}
                     </Badge>
                   </TableCell>
 
-                  <TableCell>
-                    <span className="text-xs font-bold text-muted-foreground uppercase">
+                  <TableCell className="text-center">
+                    <span className="text-[10px] font-black text-muted-foreground uppercase italic tracking-wider">
                       {user.team || "— N/A —"}
                     </span>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="text-center">
                     <Badge variant="outline" className={cn(
-                      "text-[9px] uppercase font-bold",
-                      user.status === "Active" ? "text-green-500 border-green-500/20" : "text-red-500 border-red-500/20"
+                      "text-[8px] uppercase font-black tracking-tighter px-2",
+                      user.status === "Active" ? "text-primary border-primary/20" : "text-destructive border-destructive/20"
                     )}>
                       {user.status}
                     </Badge>
@@ -193,18 +179,18 @@ export default function AdminUsersPage() {
                           <MoreHorizontal className="h-5 w-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Acciones</DropdownMenuLabel>
+                      <DropdownMenuContent align="end" className="w-48 rounded-[calc(var(--radius)-2px)]">
+                        <DropdownMenuLabel className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Cuentas</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer font-medium text-xs">
-                          <Eye className="mr-2 h-4 w-4 text-primary" /> Ver Detalles
+                        <DropdownMenuItem className="cursor-pointer font-black text-[10px] uppercase tracking-wider">
+                          <Eye className="mr-2 h-4 w-4 text-primary" /> Detalles
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer font-medium text-xs">
-                          <Edit className="mr-2 h-4 w-4 text-blue-500" /> Editar Rol / Equipo
+                        <DropdownMenuItem className="cursor-pointer font-black text-[10px] uppercase tracking-wider">
+                          <Edit className="mr-2 h-4 w-4 text-foreground/50" /> Editar
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer font-bold text-xs text-red-500 focus:text-red-500 focus:bg-red-500/10">
-                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar Cuenta
+                        <DropdownMenuItem className="cursor-pointer font-black text-[10px] uppercase tracking-wider text-destructive focus:text-destructive focus:bg-destructive/10">
+                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -215,46 +201,45 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
 
-        {/* --- CONTROLES DE PAGINACIÓN --- */}
+        {/* --- PAGINACIÓN --- */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-secondary/10">
-            <div className="hidden sm:block text-xs text-muted-foreground font-medium uppercase tracking-widest">
-              Mostrando {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredUsers.length)} de {filteredUsers.length} usuarios
+            <div className="hidden sm:block text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+              {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredUsers.length)} de {filteredUsers.length}
             </div>
             
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
               <Button
                 variant="outline"
                 size="sm"
-                className="font-bold text-xs uppercase tracking-widest"
+                className="font-black text-[10px] uppercase tracking-widest rounded-[calc(var(--radius)-4px)]"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-              
-              <div className="text-xs font-black text-foreground uppercase tracking-widest">
-                Pág. {currentPage} / {totalPages}
+              <div className="text-[10px] font-black text-foreground uppercase tracking-widest">
+                {currentPage} / {totalPages}
               </div>
-              
               <Button
                 variant="outline"
                 size="sm"
-                className="font-bold text-xs uppercase tracking-widest"
+                className="font-black text-[10px] uppercase tracking-widest rounded-[calc(var(--radius)-4px)]"
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
               >
-                Siguiente <ChevronRight className="h-4 w-4 ml-1" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
         )}
       </div>
 
-      <div className="p-4 rounded-lg bg-orange-500/5 border border-orange-500/20 flex items-center gap-3">
-        <ShieldAlert className="h-5 w-5 text-orange-500 shrink-0" />
-        <p className="text-xs text-orange-500/80 font-medium italic">
-          Cuidado: Modificar el rol o eliminar a un usuario afectará inmediatamente sus permisos y registros en la plataforma.
+      {/* --- ALERTAS --- */}
+      <div className="p-4 rounded-[var(--radius)] bg-primary/5 border border-primary/20 flex items-center gap-3">
+        <ShieldAlert className="h-5 w-5 text-primary shrink-0" />
+        <p className="text-[10px] text-primary/80 font-black uppercase italic leading-tight">
+          Seguridad: Modificar roles o eliminar cuentas afectará inmediatamente los permisos de la plataforma.
         </p>
       </div>
     </div>

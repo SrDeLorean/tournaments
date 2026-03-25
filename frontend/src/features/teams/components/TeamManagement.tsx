@@ -12,74 +12,77 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils" // Importación estándar de shadcn
+import { cn } from "@/lib/utils"
 import { 
   MoreHorizontal, 
   ShieldAlert, 
   UserPlus, 
-  TrendingUp,
-  MapPin
+  TrendingUp
 } from "lucide-react"
 
 interface TeamManagementProps {
   teamName: string;
-  isGlobalAdmin?: boolean;
+  isGlobalAdmin: boolean;
+  players?: any[];
 }
 
 export function TeamManagement({ teamName, isGlobalAdmin }: TeamManagementProps) {
-  // Obtenemos los datos del equipo desde nuestro archivo de pruebas
   const teamData = MOCK_TEAMS[teamName] || { players: [] };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700">
+    <div className="space-y-6 animate-in fade-in duration-700 text-foreground">
       
-      {/* CABECERA DE LA SECCIÓN */}
+      {/* CABECERA - Usando Tokens Dinámicos */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-4xl font-black uppercase italic tracking-tighter">
             Roster: <span className="text-primary">{teamName}</span>
           </h2>
-          <p className="text-muted-foreground text-xs uppercase tracking-[0.2em] font-bold mt-1">
+          <p className="text-muted-foreground text-[10px] uppercase tracking-[0.2em] font-black mt-1">
             Temporada 2026 • División Pro
           </p>
         </div>
 
-        <Button className="font-black italic uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
+        <Button className="font-black italic uppercase tracking-widest text-xs bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-[var(--radius)]">
           <UserPlus className="mr-2 h-4 w-4" />
           Reclutar Jugador
         </Button>
       </div>
 
-      {/* TABLA DE JUGADORES */}
-      <div className="rounded-2xl border border-primary/10 bg-card/30 backdrop-blur-sm overflow-hidden">
+      {/* TABLA - Centralizando Bordes y Fondos */}
+      <div className="rounded-[var(--radius)] border border-border bg-card/30 backdrop-blur-sm overflow-hidden shadow-xl">
         <Table>
           <TableHeader className="bg-secondary/30">
-            <TableRow className="hover:bg-transparent border-primary/10">
-              <TableHead className="w-[300px] font-black uppercase text-[10px] tracking-widest py-4">Operador / Jugador</TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest">Especialidad</TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest">Disponibilidad</TableHead>
-              <TableHead className="font-black uppercase text-[10px] tracking-widest text-right">Performance (KDA)</TableHead>
+            <TableRow className="hover:bg-transparent border-border/50">
+              <TableHead className="w-[300px] font-black uppercase text-[10px] tracking-widest py-4 text-muted-foreground">Operador / Jugador</TableHead>
+              <TableHead className="font-black uppercase text-[10px] tracking-widest text-muted-foreground">Especialidad</TableHead>
+              <TableHead className="font-black uppercase text-[10px] tracking-widest text-muted-foreground">Disponibilidad</TableHead>
+              <TableHead className="font-black uppercase text-[10px] tracking-widest text-right text-muted-foreground">Performance (KDA)</TableHead>
               <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {teamData.players.length > 0 ? (
               teamData.players.map((player: Player) => (
-                <TableRow key={player.id} className="hover:bg-primary/5 transition-all border-primary/5 group">
+                <TableRow key={player.id} className="hover:bg-primary/5 transition-all border-border/50 group">
                   <TableCell className="py-4">
                     <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12 border-2 border-primary/10 group-hover:border-primary/40 transition-colors">
-                        <AvatarImage src={player.avatar} alt={player.nickname} />
-                        <AvatarFallback className="font-black">{player.nickname[0]}</AvatarFallback>
+                      <Avatar className="h-12 w-12 border-2 border-primary/10 group-hover:border-primary/40 transition-colors rounded-[calc(var(--radius)-4px)]">
+                        <AvatarImage src={player.avatar} alt={player.nickname} className="object-cover" />
+                        <AvatarFallback className="font-black bg-secondary text-muted-foreground">
+                          {player.nickname[0]}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                           <span className="font-black italic uppercase text-base leading-none tracking-tight">
                             {player.nickname}
                           </span>
-                          <span className="text-[10px] bg-secondary px-1 rounded font-bold">{player.country}</span>
+                          <span className="text-[9px] bg-secondary px-1.5 py-0.5 rounded font-black border border-border uppercase">
+                            {player.country}
+                          </span>
                         </div>
-                        <span className="text-[11px] text-muted-foreground font-medium mt-1 uppercase tracking-wider">
+                        <span className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-widest opacity-70">
                           {player.name}
                         </span>
                       </div>
@@ -89,18 +92,19 @@ export function TeamManagement({ teamName, isGlobalAdmin }: TeamManagementProps)
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                      <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                         {player.role}
                       </span>
                     </div>
                   </TableCell>
 
                   <TableCell>
+                    {/* Badges Semánticos: Usamos primary, secondary y destructive */}
                     <Badge variant="outline" className={cn(
-                      "text-[9px] uppercase font-black px-2.5 py-0.5 tracking-tighter border-2",
-                      player.status === "Active" && "text-green-500 border-green-500/20 bg-green-500/5",
-                      player.status === "Trial" && "text-yellow-500 border-yellow-500/20 bg-yellow-500/5",
-                      player.status === "Benched" && "text-red-500 border-red-500/20 bg-red-500/5"
+                      "text-[9px] uppercase font-black px-2.5 py-0.5 tracking-tighter border-2 rounded-full",
+                      player.status === "Active" && "text-primary border-primary/20 bg-primary/5",
+                      player.status === "Trial" && "text-foreground/60 border-border bg-secondary/50",
+                      player.status === "Benched" && "text-destructive border-destructive/20 bg-destructive/5"
                     )}>
                       {player.status}
                     </Badge>
@@ -108,15 +112,15 @@ export function TeamManagement({ teamName, isGlobalAdmin }: TeamManagementProps)
 
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <TrendingUp className="h-3 w-3 text-primary" />
-                      <span className="font-mono text-lg font-black text-primary">
+                      <TrendingUp className="h-3 w-3 text-primary opacity-50" />
+                      <span className="font-mono text-lg font-black text-primary italic">
                         {player.kda}
                       </span>
                     </div>
                   </TableCell>
 
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary transition-colors">
+                    <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary transition-colors rounded-full">
                       <MoreHorizontal className="h-5 w-5" />
                     </Button>
                   </TableCell>
@@ -124,7 +128,7 @@ export function TeamManagement({ teamName, isGlobalAdmin }: TeamManagementProps)
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground italic uppercase text-xs tracking-widest">
+                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground font-black uppercase text-[10px] tracking-[0.3em] italic opacity-40">
                   No se han detectado operadores en este sector.
                 </TableCell>
               </TableRow>
@@ -133,16 +137,19 @@ export function TeamManagement({ teamName, isGlobalAdmin }: TeamManagementProps)
         </Table>
       </div>
 
-      {/* AVISO DE ADMINISTRACIÓN GLOBAL */}
+      {/* AVISO DE ADMINISTRACIÓN - Migrado a Tokens Primary */}
       {isGlobalAdmin && (
-        <div className="flex items-start gap-4 p-5 rounded-2xl border-2 border-dashed border-orange-500/30 bg-orange-500/5 animate-pulse">
-          <div className="p-2 rounded-lg bg-orange-500/10">
-            <ShieldAlert className="h-6 w-6 text-orange-500" />
+        <div className="flex items-start gap-4 p-5 rounded-[var(--radius)] border-2 border-dashed border-primary/30 bg-primary/5 animate-in slide-in-from-bottom-2 duration-500">
+          <div className="p-2 rounded-[calc(var(--radius)-4px)] bg-primary/10">
+            <ShieldAlert className="h-6 w-6 text-primary" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-black text-orange-500 uppercase italic">Privilegios de Nivel: Administrador Global</p>
-            <p className="text-xs text-orange-500/70 leading-relaxed font-medium">
-              Estás visualizando el roster de <span className="font-bold underline">{teamName}</span>. Tienes autorización total para reasignar roles, modificar estadísticas y gestionar contratos.
+            <p className="text-xs font-black text-primary uppercase italic tracking-widest">
+              Privilegios de Nivel: Administrador Global
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed font-bold uppercase italic opacity-80">
+              Visualizando Roster de <span className="text-foreground underline decoration-primary/50">{teamName}</span>. 
+              Autorización total para gestión de contratos y estadísticas.
             </p>
           </div>
         </div>

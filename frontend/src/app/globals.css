@@ -1,8 +1,17 @@
+/* 1. IMPORTS PRIMERO (Evita errores de parsing) */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Barlow+Condensed:wght@400;700&display=swap');
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  /* TIPOGRAFÍA AMC */
+  --font-sans: 'Barlow', sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-condensed: 'Barlow Condensed', sans-serif;
+
+  /* COLORES SEMÁNTICOS */
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
@@ -24,95 +33,96 @@
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
 
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
+  /* RADIUS AMC (Más cuadrado/técnico) */
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 }
 
 @layer base {
-  /* =========================================
-     TEMA CLARO: Blanco, Negro y Rojo Fuerte
-     ========================================= */
   :root {
-    --background: 0 0% 100%; /* Fondo blanco puro */
-    --foreground: 0 0% 10%; /* Texto negro casi puro */
-    
+    /* TEMA CLARO */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    
-    /* TU COLOR PRINCIPAL: Rojo Competitivo Intenso */
-    --primary: 348 83% 47%; 
-    --primary-foreground: 0 0% 100%; /* Texto blanco sobre botones rojos */
-    
-    --secondary: 0 0% 94%; /* Grises muy claros para fondos secundarios */
+    --card-foreground: 0 0% 8%;
+    --primary: 352 100% 45%; /* Rojo AMC #e8001d */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
     --secondary-foreground: 0 0% 10%;
-    
-    --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 45%;
-    
-    --accent: 348 83% 47%; /* Detalles también en rojo */
-    --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 0 0% 88%; /* Bordes sutiles grises */
-    --input: 0 0% 88%;
-    --ring: 348 83% 47%; /* El anillo de enfoque es rojo */
-    
-    --radius: 0.75rem; /* Bordes redondeados modernos */
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
+    --border: 0 0% 88%;
+    --ring: 352 100% 45%;
+    --radius: 0.5rem;
   }
 
-  /* =========================================
-     TEMA OSCURO: Negro Profundo y Rojo Neón
-     ========================================= */
   .dark {
-    --background: 0 0% 4%; /* Negro profundísimo (casi OLED) */
-    --foreground: 0 0% 95%; /* Texto blanco/gris claro para no deslumbrar */
-    
-    --card: 0 0% 7%; /* Tarjetas un pelín más claras para dar profundidad */
-    --card-foreground: 0 0% 95%;
-    
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
-    
-    /* TU COLOR PRINCIPAL: Un rojo un poco más brillante para que "brille" en la oscuridad */
-    --primary: 348 83% 55%; 
+    /* TEMA OSCURO AMC (Negro KickStat) */
+    --background: 0 0% 4%; /* #0a0a0a */
+    --foreground: 0 0% 96%;
+    --card: 0 0% 7%; /* #121212 */
+    --card-foreground: 0 0% 96%;
+    --primary: 352 100% 45%; /* Rojo AMC Vibrante */
     --primary-foreground: 0 0% 100%;
-    
-    --secondary: 0 0% 13%; /* Grises oscuros para botones inactivos */
-    --secondary-foreground: 0 0% 95%;
-    
-    --muted: 0 0% 13%;
-    --muted-foreground: 0 0% 60%;
-    
-    --accent: 348 83% 55%;
-    --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 95%;
-    
-    --border: 0 0% 18%; /* Bordes visibles pero oscuros */
-    --input: 0 0% 18%;
-    --ring: 348 83% 55%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 55%;
+    --border: 0 0% 15%; /* #262626 */
+    --ring: 352 100% 45%;
   }
 }
 
-/* (Opcional) Esto asegura que el fondo general del body tome los colores base */
 @layer base {
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    /* Efecto de viñeta sutil en el fondo */
+    background-image: radial-gradient(circle at 50% 0%, rgba(232, 0, 29, 0.04) 0%, transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* Títulos de Impacto (Como en lvp.comunidadamc.cl) */
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    @apply uppercase italic tracking-tighter leading-[0.85];
+  }
+
+  /* Textos condensados para tablas/data */
+  .font-condensed {
+    font-family: var(--font-condensed);
+    @apply uppercase font-bold;
+  }
+
+  /* Estilización de Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-primary/30 rounded-full transition-colors; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-primary/60; }
+}
+
+@layer utilities {
+  /* Clase para los headers de sección en el Dashboard */
+  .text-amc-title {
+    @apply font-black italic uppercase tracking-tighter;
+    font-family: var(--font-display);
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+  }
+
+  /* Efecto Neón sutil para logos/badges */
+  .neon-glow {
+    @apply shadow-[0_0_20px_rgba(232,0,29,0.25)] border-primary/40;
+  }
+
+  /* Panel estilo "Glass" para el sidebar */
+  .glass-sidebar {
+    @apply bg-card/60 backdrop-blur-xl border-r border-border/50;
   }
 }

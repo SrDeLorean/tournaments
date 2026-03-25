@@ -1,36 +1,35 @@
-// src/store/useUserStore.ts
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 
-// ... interfaz UserState ...
+// 1. El contrato perfecto: Le decimos a TypeScript exactamente qué esperar
+export interface UserState {
+  username: string | null;
+  role: string | null;
+  team: string | null;
+  avatar: string | null;
+  setUserData: (data: Partial<UserState>) => void;
+  setAuth: (username: string, role: string) => void; // <--- Ahora acepta 2 argumentos
+  logout: () => void;
+}
 
+// 2. La implementación
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
       username: null,
       role: null,
-      isAuthenticated: false,
+      team: null,
+      avatar: null,
 
-      setAuth: (username, role) => set({ 
-        username, 
-        role, 
-        isAuthenticated: true 
-      }),
-
-      logout: () => {
-        // 1. Limpiamos el estado de Zustand
-        set({ username: null, role: null, isAuthenticated: false });
-        
-        // 2. Limpiamos el token de Axios/LocalStorage si existe
-        localStorage.removeItem('auth_token');
-        
-        // 3. Opcional: Forzar redirección al login
-        window.location.href = '/login';
-      },
+      setUserData: (data) => set((state) => ({ ...state, ...data })),
+      
+      // <--- Toma los 2 argumentos del Login y los guarda en el estado global
+      setAuth: (username, role) => set({ username, role }), 
+      
+      logout: () => set({ username: null, role: null, team: null, avatar: null }),
     }),
     {
-      name: 'user-storage', // Nombre de la cookie/storage
-      storage: createJSONStorage(() => localStorage),
+      name: 'tourneyos-user-session',
     }
   )
 )
