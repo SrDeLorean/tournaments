@@ -11,8 +11,12 @@ const Avatar = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Root
     ref={ref}
+    /* INYECCIÓN TÁCTICA:
+       1. rounded-md en lugar de rounded-full para un look más agresivo (cuadrado técnico).
+       2. Borde sutil y fondo translúcido (glass).
+    */
     className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+      "relative flex h-12 w-12 shrink-0 overflow-hidden rounded-md border border-border/50 bg-background/50 shadow-md transition-all hover:border-primary/50 hover:shadow-[0_0_15px_hsla(var(--primary),0.2)]",
       className
     )}
     {...props}
@@ -26,7 +30,7 @@ const AvatarImage = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Image
     ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
+    className={cn("aspect-square h-full w-full object-cover", className)}
     {...props}
   />
 ))
@@ -38,8 +42,9 @@ const AvatarFallback = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AvatarPrimitive.Fallback
     ref={ref}
+    /* INYECCIÓN TÁCTICA: Tipografía AMC para las iniciales si no hay imagen */
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+      "flex h-full w-full items-center justify-center rounded-md bg-primary/10 text-primary font-display italic text-xl tracking-wider",
       className
     )}
     {...props}

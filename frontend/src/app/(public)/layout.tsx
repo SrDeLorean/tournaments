@@ -3,11 +3,12 @@ import { PublicNavbar } from "@/components/shared/PublicNavbar"
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 relative">
+    /* Solo necesitamos flex-col para que el footer (cuando lo haya) se quede abajo */
+    <div className="flex min-h-screen flex-col relative overflow-hidden">
       
       <PublicNavbar />
       
-      <main className="relative z-10 flex-1">
+      <main className="flex-1 relative z-10 w-full">
         {children}
       </main>
       

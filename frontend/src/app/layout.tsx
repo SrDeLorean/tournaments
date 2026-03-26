@@ -1,9 +1,6 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/shared/ThemeProvider" // <--- Importamos nuestro ThemeProvider
-
-const inter = Inter({ subsets: ["latin"] })
+import { ThemeProvider } from "@/components/shared/ThemeProvider"
 
 export const metadata: Metadata = {
   title: "TourneyOS - Plataforma de Esports de Élite",
@@ -16,12 +13,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // <--- IMPORTANTE: Asegúrate de que el html tenga esta estructura:
     <html lang="es" suppressHydrationWarning>
-      <body className={inter.className}>
+      {/* Eliminamos 'inter.className'. Nuestro globals.css ya asigna Barlow y Bebas Neue */}
+      <body className="antialiased">
         <ThemeProvider
-          attribute="class" // <--- Le dice a next-themes que use clases (como .dark)
-          defaultTheme="system" // <--- Respeta el tema del sistema operativo (Windows/Android)
+          attribute="class"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >

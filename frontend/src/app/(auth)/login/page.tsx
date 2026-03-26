@@ -3,22 +3,26 @@ import { LoginForm } from "@/features/auth/components/LoginForm"
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-3xl font-black uppercase italic tracking-tighter">Bienvenido de nuevo</h1>
-        <p className="text-sm text-muted-foreground font-medium">
-          Ingresa tus credenciales para acceder a tu panel.
+    <div className="flex w-full flex-col justify-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      <div className="flex flex-col space-y-2 text-center md:text-left">
+        <h1 className="text-amc-title text-5xl">
+          Bienvenido  <span className="text-primary">de nuevo</span>
+        </h1>
+        <p className="text-description">
+          Ingresa tus credenciales de operador para acceder al panel táctico.
         </p>
       </div>
       
       <LoginForm />
 
-      <p className="px-8 text-center text-sm text-muted-foreground">
+      <p className="text-center md:text-left text-description text-sm">
         ¿No tienes una cuenta?{" "}
-        <Link href="/register" className="font-bold text-primary hover:underline underline-offset-4">
+        <Link href="/register" className="text-technical text-primary hover:text-glow-primary transition-colors ml-1">
           Regístrate aquí
         </Link>
       </p>
+      
     </div>
   )
 }

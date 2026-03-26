@@ -1,6 +1,6 @@
-// src/components/ui/card.tsx
 import * as React from "react"
-import { cn } from "@/lib/utils" // Asegúrate de tener configurada tu utilidad cn
+
+import { cn } from "@/lib/utils"
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -8,8 +8,9 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    /* INYECCIÓN TÁCTICA: 'glass-card' viene del globals.css */
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "glass-card rounded-xl text-card-foreground overflow-hidden",
       className
     )}
     {...props}
@@ -23,7 +24,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-1.5 p-6 border-b border-border/30", className)}
     {...props}
   />
 ))
@@ -35,8 +36,9 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
+    /* INYECCIÓN TÁCTICA: Títulos de panel por defecto */
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
+      "text-amc-title text-2xl tracking-tight",
       className
     )}
     {...props}
@@ -50,7 +52,8 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    /* INYECCIÓN TÁCTICA: Tipografía técnica condensada */
+    className={cn("text-description", className)}
     {...props}
   />
 ))
@@ -60,7 +63,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  <div ref={ref} className={cn("p-6 pt-0 mt-6", className)} {...props} />
 ))
 CardContent.displayName = "CardContent"
 
@@ -70,7 +73,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn("flex items-center p-6 pt-0 border-t border-border/30 mt-auto", className)}
     {...props}
   />
 ))

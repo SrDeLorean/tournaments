@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Trophy, Star, CalendarDays, Shield } from "lucide-react"
+import { Trophy, CalendarDays } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
-// Mock de los 11 elegidos separados por líneas (Formación 4-3-3)
+// Mock de los 11 elegidos (Formación 4-3-3)
 const TEAM_OF_THE_WEEK = {
   attackers: [
     { id: "a1", name: "Flash99", pos: "EI", ovr: 88, team: "Titans Gaming", isStar: false },
@@ -30,48 +30,54 @@ const TEAM_OF_THE_WEEK = {
   ]
 }
 
-// Componente reutilizable para la Mini-Carta de Jugador "In Form"
+// Mini-Carta Holográfica
 const PlayerMiniCard = ({ player }: { player: any }) => (
-  <div className={cn(
-    "relative flex flex-col items-center justify-center w-24 sm:w-28 md:w-32 hover:-translate-y-2 transition-transform duration-300 cursor-pointer group",
-  )}>
-    {/* Efecto de brillo si es el Jugador Estrella (MVP) */}
+  <div className="relative flex flex-col items-center justify-center w-24 sm:w-28 md:w-32 hover:-translate-y-2 transition-transform duration-300 cursor-pointer group">
+    
+    {/* Resplandor trasero para el MVP */}
     {player.isStar && (
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-yellow-500/30 blur-xl rounded-full pointer-events-none animate-pulse" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-yellow-500/20 blur-2xl rounded-full pointer-events-none animate-pulse" />
     )}
 
-    {/* Fondo de la Carta (Escudo invertido estilo FUT) */}
+    {/* Fondo de la Carta (Cristal Táctico) */}
     <div className={cn(
-      "relative w-full aspect-[2.5/3.5] rounded-t-xl rounded-b-[2rem] border-2 shadow-xl overflow-hidden flex flex-col items-center pt-2 md:pt-4",
-      player.isStar ? "bg-gradient-to-b from-yellow-600 to-yellow-950 border-yellow-400" : "bg-gradient-to-b from-zinc-800 to-zinc-950 border-zinc-700 dark:border-white/10 dark:from-zinc-800 dark:to-black"
+      "relative w-full aspect-[2.5/3.5] rounded-t-sm rounded-b-xl border backdrop-blur-md shadow-xl overflow-hidden flex flex-col items-center pt-2 md:pt-4 transition-colors",
+      player.isStar 
+        ? "bg-yellow-950/40 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]" 
+        : "bg-card/40 border-border/50 hover:border-primary/50"
     )}>
-      {/* OVR y Posición (Arriba a la izquierda) */}
+      
+      {/* OVR y Posición */}
       <div className="absolute top-2 left-2 flex flex-col items-center">
         <span className={cn(
-          "font-black italic leading-none text-sm md:text-lg",
-          player.isStar ? "text-yellow-100" : "text-white"
-        )}>{player.ovr}</span>
+          "font-display text-2xl md:text-3xl leading-none",
+          player.isStar ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" : "text-foreground"
+        )}>
+          {player.ovr}
+        </span>
         <span className={cn(
-          "text-[8px] md:text-[10px] font-black uppercase tracking-widest mt-0.5",
-          player.isStar ? "text-yellow-400" : "text-primary"
-        )}>{player.pos}</span>
+          "text-technical text-[8px] md:text-[10px] mt-0.5",
+          player.isStar ? "text-yellow-500" : "text-primary"
+        )}>
+          {player.pos}
+        </span>
       </div>
 
-      {/* Avatar */}
-      <Avatar className="h-12 w-12 md:h-16 md:w-16 border-2 border-transparent group-hover:border-white/50 transition-colors z-10 mt-1 md:mt-2">
+      {/* Avatar Táctico */}
+      <Avatar className="h-12 w-12 md:h-16 md:w-16 rounded-sm border border-border/50 group-hover:border-primary/50 transition-colors z-10 mt-1 md:mt-2 bg-background/50">
         <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}&backgroundColor=transparent`} />
-        <AvatarFallback>{player.name.slice(0,2)}</AvatarFallback>
+        <AvatarFallback className="font-display text-xl text-muted-foreground">{player.name.slice(0,2)}</AvatarFallback>
       </Avatar>
 
-      {/* Nombre y Equipo */}
-      <div className="w-full mt-auto bg-black/60 backdrop-blur-sm p-2 flex flex-col items-center justify-center">
+      {/* Footer (Nombre y Equipo) */}
+      <div className="w-full mt-auto surface-panel-solid border-x-0 border-b-0 p-2 flex flex-col items-center justify-center">
         <span className={cn(
-          "font-black uppercase italic text-[9px] md:text-xs tracking-tighter truncate w-full text-center",
-          player.isStar ? "text-yellow-400" : "text-white"
+          "font-condensed text-xs md:text-sm tracking-wide truncate w-full text-center",
+          player.isStar ? "text-yellow-400" : "text-foreground"
         )}>
           {player.name}
         </span>
-        <span className="text-[7px] md:text-[9px] font-bold text-zinc-400 uppercase tracking-widest truncate w-full text-center mt-0.5">
+        <span className="text-[7px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest truncate w-full text-center mt-0.5">
           {player.team}
         </span>
       </div>
@@ -83,34 +89,38 @@ export default function TOTWPublicPage() {
   const [activeTab, setActiveTab] = useState<"TOTW" | "TOTS">("TOTW")
 
   return (
-    <div className="container mx-auto px-4 py-12 animate-in fade-in duration-700">
+    <div className="container mx-auto px-4 py-12 animate-in fade-in slide-in-from-bottom-8 duration-700 relative">
+      
+      {/* Brillo Ambiental */}
+      <div className="ambient-glow-primary top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64" />
       
       {/* HEADER DE LA SECCIÓN */}
-      <div className="text-center space-y-4 mb-10">
-        <Badge variant="outline" className="uppercase tracking-widest font-black text-[10px] px-3 py-1 text-primary border-primary/30 bg-primary/10">
-          Galardones Oficiales
-        </Badge>
-        <h1 className="text-5xl md:text-6xl font-black italic uppercase tracking-tighter">
-          Team of the <span className={cn("transition-colors duration-500", activeTab === "TOTW" ? "text-primary" : "text-yellow-500")}>
+      <div className="text-center space-y-6 mb-12 relative z-10">
+        <Badge variant="technical">Galardones Oficiales</Badge>
+        <h1 className="text-amc-title text-6xl md:text-8xl">
+          Team of the <span className={cn(
+            "transition-colors duration-500", 
+            activeTab === "TOTW" ? "text-glow-primary" : "text-yellow-500 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+          )}>
             {activeTab === "TOTW" ? "Week" : "Season"}
           </span>
         </h1>
-        <p className="text-muted-foreground font-medium max-w-xl mx-auto">
+        <p className="text-description max-w-2xl mx-auto">
           {activeTab === "TOTW" 
-            ? "El XI ideal de la última jornada. Los jugadores que marcaron la diferencia en el campo de juego." 
+            ? "El XI ideal de la última jornada. Los operadores que marcaron la diferencia táctica." 
             : "Los absolutos mejores de la temporada. Leyendas consagradas que dominaron la liga."}
         </p>
       </div>
 
       {/* SELECTOR TOTW / TOTS */}
-      <div className="flex justify-center mb-12">
-        <div className="flex bg-card border border-border rounded-2xl p-1.5 shadow-sm">
+      <div className="flex justify-center mb-16 relative z-10">
+        <div className="flex surface-panel p-1.5 rounded-sm">
           <Button 
             variant="ghost" 
             onClick={() => setActiveTab("TOTW")}
             className={cn(
-              "w-32 rounded-xl font-black uppercase tracking-widest text-xs transition-all h-10",
-              activeTab === "TOTW" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
+              "w-32 rounded-sm text-technical transition-all h-10",
+              activeTab === "TOTW" ? "bg-primary text-white shadow-md" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <CalendarDays className="w-4 h-4 mr-2" /> TOTW
@@ -119,7 +129,7 @@ export default function TOTWPublicPage() {
             variant="ghost" 
             onClick={() => setActiveTab("TOTS")}
             className={cn(
-              "w-32 rounded-xl font-black uppercase tracking-widest text-xs transition-all h-10",
+              "w-32 rounded-sm text-technical transition-all h-10",
               activeTab === "TOTS" ? "bg-yellow-500 text-yellow-950 shadow-md" : "text-muted-foreground hover:text-foreground hover:text-yellow-500"
             )}
           >
@@ -128,43 +138,40 @@ export default function TOTWPublicPage() {
         </div>
       </div>
 
-      {/* EL CAMPO DE FÚTBOL (ALINEACIÓN) */}
-      <div className="max-w-4xl mx-auto relative rounded-[3rem] border-4 border-border/50 bg-secondary/30 p-4 md:p-12 overflow-hidden shadow-2xl">
+      {/* EL CAMPO DE FÚTBOL (HUD TÁCTICO) */}
+      <div className="max-w-5xl mx-auto relative rounded-md border border-border/50 bg-background/40 backdrop-blur-sm p-4 md:p-12 overflow-hidden shadow-2xl">
         
-        {/* Líneas del campo dibujadas con CSS */}
+        {/* Líneas del campo tipo radar */}
         <div className="absolute inset-0 pointer-events-none opacity-10 dark:opacity-20 flex flex-col justify-between">
-          <div className="w-1/2 h-32 border-b-2 border-r-2 border-l-2 border-foreground mx-auto rounded-b-xl" /> {/* Área Local */}
-          <div className="w-full h-0 border-t-2 border-foreground relative">
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-2 border-foreground" /> {/* Círculo Central */}
+          <div className="w-1/2 h-32 border-b border-r border-l border-foreground mx-auto rounded-b-sm" /> 
+          <div className="w-full h-0 border-t border-foreground relative">
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-foreground" />
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-foreground" />
           </div>
-          <div className="w-1/2 h-32 border-t-2 border-r-2 border-l-2 border-foreground mx-auto rounded-t-xl" /> {/* Área Visitante */}
+          <div className="w-1/2 h-32 border-t border-r border-l border-foreground mx-auto rounded-t-sm" /> 
         </div>
 
-        {/* CONTENEDOR DE JUGADORES (FORMACIÓN 4-3-3) */}
+        {/* CONTENEDOR DE JUGADORES */}
         <div className="relative z-10 flex flex-col gap-10 md:gap-16 pt-8">
           
-          {/* DELANTEROS */}
           <div className="flex justify-center gap-4 md:gap-16">
             {TEAM_OF_THE_WEEK.attackers.map(player => (
               <PlayerMiniCard key={player.id} player={player} />
             ))}
           </div>
 
-          {/* MEDIOCAMPISTAS */}
           <div className="flex justify-center gap-4 md:gap-20">
             {TEAM_OF_THE_WEEK.midfielders.map(player => (
               <PlayerMiniCard key={player.id} player={player} />
             ))}
           </div>
 
-          {/* DEFENSAS */}
           <div className="flex justify-center gap-2 md:gap-8">
             {TEAM_OF_THE_WEEK.defenders.map(player => (
               <PlayerMiniCard key={player.id} player={player} />
             ))}
           </div>
 
-          {/* PORTERO */}
           <div className="flex justify-center mt-4">
             {TEAM_OF_THE_WEEK.goalkeeper.map(player => (
               <PlayerMiniCard key={player.id} player={player} />

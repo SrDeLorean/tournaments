@@ -3,10 +3,15 @@
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { cva, type VariantProps } from "class-variance-authority"
+
 import { cn } from "@/lib/utils"
 
 const labelVariants = cva(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  /* INYECCIÓN TÁCTICA: 
+     1. text-[10px] y tracking-[0.2em] para look técnico.
+     2. peer-focus-visible:text-primary hace que el label se vuelva ROJO cuando seleccionas el input.
+  */
+  "text-[10px] font-black uppercase italic tracking-[0.2em] text-muted-foreground/80 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-40 transition-colors peer-focus-visible:text-primary select-none"
 )
 
 const Label = React.forwardRef<
@@ -16,7 +21,8 @@ const Label = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn(labelVariants(), className)}
+    /* Añadimos un pequeño margen inferior (mb-2) por defecto y bloque */
+    className={cn(labelVariants(), "mb-2 block pl-0.5", className)}
     {...props}
   />
 ))
