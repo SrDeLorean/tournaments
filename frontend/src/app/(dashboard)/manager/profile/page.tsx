@@ -1,4 +1,4 @@
-import { ProfileView } from "@/components/shared/ProfileView"
+import { ProfileView } from "@/components/views/ProfileView"
 
 export default function ManagerProfilePage() {
   return <ProfileView />

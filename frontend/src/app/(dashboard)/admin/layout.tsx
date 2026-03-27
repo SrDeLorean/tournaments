@@ -1,6 +1,6 @@
 "use client" // <--- ¡AÑADE ESTA LÍNEA AQUÍ!
 
-import { DashboardShell, MenuSection } from "@/components/shared/DashboardShell"
+import { DashboardShell, MenuSection } from "@/components/layout/DashboardShell"
 import { 
   ShieldAlert, UserCog, ShieldCheck, ClipboardList, 
   CalendarRange, Trophy, Medal, CalendarDays, ArrowRightLeft 

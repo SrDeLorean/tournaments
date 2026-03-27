@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useUserStore } from "@/store/useUserStore"
 import { TeamSwitcher } from "@/components/shared/TeamSwitcher"
-import { DashboardNavbar } from "@/components/shared/DashboardNavbar"
+import { DashboardNavbar } from "@/components/layout/DashboardNavbar"
 import { cn } from "@/lib/utils"
 import { Shield } from "lucide-react"
 

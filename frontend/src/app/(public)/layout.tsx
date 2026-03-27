@@ -1,5 +1,5 @@
 // src/app/(public)/layout.tsx
-import { PublicNavbar } from "@/components/shared/PublicNavbar"
+import { PublicNavbar } from "@/components/layout/PublicNavbar"
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
