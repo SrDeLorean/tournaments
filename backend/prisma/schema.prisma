@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String @id @default(uuid())
+  gamertag     String @unique
+  email        String @unique
+  passwordHash String
+  role         String @default("player")
+
+  tournaments Tournament[]
+  teams       Team[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Tournament {
+  id        String    @id @default(uuid())
+  name      String
+  game      String    @default("EA Sports FC 26")
+  status    String    @default("OPEN")
+  maxTeams  Int       @default(16)
+  startDate DateTime?
+
+  creator   User   @relation(fields: [creatorId], references: [id])
+  creatorId String
+
+  teams   Team[]
+  matches Match[] // 👈 Aquí está la relación inversa que pedía Prisma
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Team {
+  id   String @id @default(uuid())
+  name String
+
+  captain   User   @relation(fields: [captainId], references: [id])
+  captainId String
+
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId String
+
+  homeMatches  Match[]    @relation("HomeMatches")
+  awayMatches  Match[]    @relation("AwayMatches")
+  wonMatches   Match[]    @relation("MatchWinner") // 👈 NUEVO
+  
+  deletedAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Match {
+  id String @id @default(uuid())
+
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId String
+
+  round String @default("Fase de Grupos")
+
+  homeTeam   Team?   @relation("HomeMatches", fields: [homeTeamId], references: [id])
+  homeTeamId String?
+
+  awayTeam   Team?   @relation("AwayMatches", fields: [awayTeamId], references: [id])
+  awayTeamId String?
+
+  homeScore Int? @default(0)
+  awayScore    Int?       @default(0)
+  
+  winner       Team?      @relation("MatchWinner", fields: [winnerId], references: [id]) // 👈 NUEVO
+  winnerId     String?    // 👈 NUEVO
+  
+  status String @default("PENDING")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
