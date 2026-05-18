@@ -5,13 +5,13 @@ export const login = async (email: string, password: string) => {
   
   // Si el login es exitoso, guardamos el token y el usuario
   if (response.data.token) {
-    localStorage.setItem('successors_token', response.data.token);
-    localStorage.setItem('successors_user', JSON.stringify(response.data.user));
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
   }
   return response.data;
 };
 
 export const logout = () => {
-  localStorage.removeItem('successors_token');
-  localStorage.removeItem('successors_user');
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
 };

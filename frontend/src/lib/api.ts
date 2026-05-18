@@ -7,7 +7,7 @@ const api = axios.create({
 // Interceptor: Antes de que salga cualquier petición, le pegamos el Token
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('successors_token');
+    const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }

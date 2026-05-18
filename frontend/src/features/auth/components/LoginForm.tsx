@@ -39,7 +39,7 @@ export function LoginForm() {
       }
 
       // 3. Guardar el Token en localStorage para futuras peticiones (crear torneos, etc)
-      localStorage.setItem("successors_token", data.token)
+      localStorage.setItem("token", data.token)
 
       // 4. Guardar en el Store global
       // Ajusta esto según lo que requiera tu Zustand store

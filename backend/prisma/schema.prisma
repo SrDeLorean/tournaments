@@ -7,81 +7,299 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- ENUMS (ROLES MINÚSCULA / STATUS MAYÚSCULA) ---
+
+enum Role {
+  admin    // super usuario global
+  manager  // administrador de comunidad (espacio gamer, etc.)
+  player   // jugador / entrenador de equipo
+}
+
+enum SeasonStatus {
+  REGISTRATION
+  IN_PROGRESS
+  FINISHED
+}
+
+enum TransferStatus {
+  PENDING
+  ACCEPTED
+  PAID
+  REJECTED
+  CANCELLED
+}
+
+// --- NÚCLEO DE USUARIOS ---
+
 model User {
-  id           String @id @default(uuid())
-  gamertag     String @unique
-  email        String @unique
-  passwordHash String
-  role         String @default("player")
+  id            String   @id @default(uuid())
+  gamertag      String   @unique
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(player)
+  
+  // CONTROL DE ESTADO (SOFT DELETE)
+  active        Boolean  @default(true) 
+
+  // Gobernanza
+  managedCommunity Community?        @relation("CommunityManager")
+  memberships      CommunityMember[]
+
+  // Competición
+  ownedTeams    Team[]            @relation("TeamOwner")
+  registrations Roster[]
+
+  // Mercado y Social
+  sentRequests  TransferRequest[] @relation("PlayerRequests")
+  messages      TransferMessage[]
+
+  // Datos EA Sports
+  gamertagEa    String?           @unique
+  playerStats   PlayerStats[]
+  playerLogs    PlayerLog[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// --- GOBERNANZA Y COMUNIDADES ---
+
+model Community {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  
+  // Relación protegida para Soft Delete
+  managerId String?  @unique
+  manager   User?    @relation("CommunityManager", fields: [managerId], references: [id], onDelete: SetNull)
 
   tournaments Tournament[]
-  teams       Team[]
+  members     CommunityMember[]
 
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
+
+model CommunityMember {
+  id          String    @id @default(uuid())
+  userId      String
+  communityId String
+  user        User      @relation(fields: [userId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id])
+
+  @@unique([userId, communityId])
+}
+
+// --- ESTRUCTURA DE TORNEOS ---
 
 model Tournament {
-  id        String    @id @default(uuid())
-  name      String
-  game      String    @default("EA Sports FC 26")
-  status    String    @default("OPEN")
-  maxTeams  Int       @default(16)
-  startDate DateTime?
+  id          String    @id @default(uuid())
+  name        String
+  game        String    @default("EA Sports FC 26")
+  communityId String
+  community   Community @relation(fields: [communityId], references: [id])
 
-  creator   User   @relation(fields: [creatorId], references: [id])
-  creatorId String
+  seasons     Season[]
 
-  teams   Team[]
-  matches Match[] // 👈 Aquí está la relación inversa que pedía Prisma
-
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
+
+model Season {
+  id           String       @id @default(uuid())
+  name         String
+  status       SeasonStatus @default(REGISTRATION) // STATUS EN MAYÚSCULA
+  tournamentId String
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+
+  teams        SeasonTeam[]
+  matches      Match[]
+  requests     TransferRequest[]
+  teamStats    TeamStats[]
+  playerStats  PlayerStats[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --- EQUIPOS Y ROSTERS ---
 
 model Team {
-  id   String @id @default(uuid())
-  name String
+  id           String   @id @default(uuid())
+  name         String
+  logoUrl      String?
+  clubIdEa     String?  @unique
 
-  captain   User   @relation(fields: [captainId], references: [id])
-  captainId String
+  // --- CAMPO AGREGADO PARA SOFT DELETE ---
+  // true = operativo, false = desactivado/archivado
+  active       Boolean  @default(true) 
 
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId String
+  // Relación protegida para Soft Delete (User)
+  ownerId      String?
+  owner        User?    @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
-  homeMatches  Match[]    @relation("HomeMatches")
-  awayMatches  Match[]    @relation("AwayMatches")
-  wonMatches   Match[]    @relation("MatchWinner") // 👈 NUEVO
-  
-  deletedAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  seasonTeams  SeasonTeam[]
+  requests     TransferRequest[]
+  teamStats    TeamStats[]
+  playerStats  PlayerStats[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
+model SeasonTeam {
+  id          String   @id @default(uuid())
+  seasonId    String
+  teamId      String
+  communityId String
+
+  season      Season  @relation(fields: [seasonId], references: [id])
+  team        Team    @relation(fields: [teamId], references: [id])
+  roster      Roster[]
+
+  homeMatches Match[] @relation("HomeMatches")
+  awayMatches Match[] @relation("AwayMatches")
+  wonMatches  Match[] @relation("MatchWinner")
+
+  // CORRECCIÓN: Un equipo no puede estar 2 veces en la MISMA liga (temporada)
+  // pero SÍ puede estar en distintas ligas (seasons) de la misma comunidad.
+  @@unique([teamId, seasonId]) 
+}
+
+model Roster {
+  id           String     @id @default(uuid())
+  userId       String
+  seasonTeamId String
+  communityId  String
+
+  // --- NUEVOS CAMPOS DE REGISTRO HISTÓRICO ---
+  joinedAt     DateTime   @default(now())
+  leftAt       DateTime?  // Si es NULL, el jugador sigue activo en el equipo
+  status       String     @default("ACTIVE") // "ACTIVE" o "INACTIVE"
+
+  user         User       @relation(fields: [userId], references: [id])
+  seasonTeam   SeasonTeam @relation(fields: [seasonTeamId], references: [id])
+
+  // OJO: Si quieres que un jugador pueda irse y volver a la misma liga en el mismo equipo, 
+  // debes quitar el @@unique([userId, seasonTeamId]) o manejarlo por backend.
+}
+
+// --- PARTIDOS ---
+
 model Match {
-  id String @id @default(uuid())
+  id          String @id @default(uuid())
+  seasonId    String
+  season      Season @relation(fields: [seasonId], references: [id])
 
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  tournamentId String
+  round       String @default("FASE DE GRUPOS") // VALOR POR DEFECTO EN MAYÚSCULA
 
-  round String @default("Fase de Grupos")
+  homeTeamId  String?
+  homeTeam    SeasonTeam? @relation("HomeMatches", fields: [homeTeamId], references: [id])
 
-  homeTeam   Team?   @relation("HomeMatches", fields: [homeTeamId], references: [id])
-  homeTeamId String?
+  awayTeamId  String?
+  awayTeam    SeasonTeam? @relation("AwayMatches", fields: [awayTeamId], references: [id])
 
-  awayTeam   Team?   @relation("AwayMatches", fields: [awayTeamId], references: [id])
-  awayTeamId String?
+  homeScore   Int? @default(0)
+  awayScore   Int? @default(0)
 
-  homeScore Int? @default(0)
-  awayScore    Int?       @default(0)
-  
-  winner       Team?      @relation("MatchWinner", fields: [winnerId], references: [id]) // 👈 NUEVO
-  winnerId     String?    // 👈 NUEVO
-  
-  status String @default("PENDING")
+  winnerId    String?
+  winner      SeasonTeam? @relation("MatchWinner", fields: [winnerId], references: [id])
+
+  status      String @default("PENDING") // STATUS EN MAYÚSCULA
+
+  teamStats   TeamStats[]
+  playerStats PlayerStats[]
+  playerLogs  PlayerLog[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// --- FICHAJES ---
+
+model TransferRequest {
+  id        String         @id @default(uuid())
+  status    TransferStatus @default(PENDING) // STATUS EN MAYÚSCULA
+
+  playerId  String
+  player    User           @relation("PlayerRequests", fields: [playerId], references: [id])
+
+  teamId    String
+  team      Team           @relation(fields: [teamId], references: [id])
+
+  seasonId  String
+  season    Season         @relation(fields: [seasonId], references: [id])
+
+  messages  TransferMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model TransferMessage {
+  id        String          @id @default(uuid())
+  requestId String
+  request   TransferRequest @relation(fields: [requestId], references: [id])
+  authorId  String
+  author    User            @relation(fields: [authorId], references: [id])
+  content   String          @db.Text
+
+  createdAt DateTime @default(now())
+}
+
+// --- ESTADÍSTICAS (PROCESAMIENTO DE DATOS) ---
+
+model TeamStats {
+  id        String @id @default(uuid())
+  teamId    String
+  matchId   String
+  seasonId  String
+
+  team      Team   @relation(fields: [teamId], references: [id])
+  match     Match  @relation(fields: [matchId], references: [id])
+  season    Season @relation(fields: [seasonId], references: [id])
+
+  goalsFor       Int @default(0)
+  goalsAgainst   Int @default(0)
+  processed      Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PlayerStats {
+  id        String @id @default(uuid())
+  playerId  String
+  teamId    String
+  matchId   String
+  seasonId  String
+
+  player    User   @relation(fields: [playerId], references: [id])
+  team      Team   @relation(fields: [teamId], references: [id])
+  match     Match  @relation(fields: [matchId], references: [id])
+  season    Season @relation(fields: [seasonId], references: [id])
+
+  position  String
+  rating    Decimal @db.Decimal(4, 2)
+  goals     Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PlayerLog {
+  id         String   @id @default(uuid())
+  matchId    String
+  userId     String?
+  teamId     String
+  playerName String 
+  status     String   @default("OK") // STATUS EN MAYÚSCULA
+  played     Boolean  @default(false)
+
+  user       User?    @relation(fields: [userId], references: [id])
+  match      Match    @relation(fields: [matchId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  @@unique([playerName, matchId])
 }

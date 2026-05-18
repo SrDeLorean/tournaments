@@ -31,31 +31,23 @@ export const register = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-export const login = async (req: Request, res: Response): Promise<any> => {
-    try {
-        const { email, password } = req.body;
-        const user = await prisma.user.findUnique({ where: { email } });
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
 
-        if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-            return res.status(401).json({ message: "Credenciales inválidas" });
-        }
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    return res.status(401).json({ message: "Credenciales inválidas" });
+  }
 
-        const token = jwt.sign(
-          { id: user.id, gamertag: user.gamertag, role: user.role }, // 👈 Añadimos el rol al token
-          process.env.JWT_SECRET || 'secret',
-          { expiresIn: '8h' }
-        );
+  // Generamos el token con la info necesaria para el Backend
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role }, 
+    process.env.JWT_SECRET || 'secret_tourney_2026',
+    { expiresIn: '8h' }
+  );
 
-        return res.json({
-          message: "Login exitoso",
-          token,
-          user: { 
-            id: user.id, 
-            gamertag: user.gamertag, 
-            role: user.role // 👈 Devolvemos el rol al frontend
-          }
-        });
-    } catch (error) {
-        return res.status(500).json({ message: "Error" });
-    }
+  res.json({ 
+    token, 
+    user: { id: user.id, gamertag: user.gamertag, role: user.role } 
+  });
 };

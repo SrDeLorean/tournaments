@@ -1,201 +1,151 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import { MOCK_TEAMS } from "@/lib/mock-data"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { CoreTable } from "@/components/shared/CoreTable"
+import { CoreStatusBadge } from "@/components/shared/CoreTable/CoreStatusBadge"
+import { teamService } from "@/features/teams/team.service"
+import { TeamForm } from "@/features/teams/components/TeamForm"
+import { Trophy, ChevronLeft, ShieldAlert, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, 
-  DropdownMenuSeparator, DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu"
-import { 
-  ShieldCheck, MoreHorizontal, Plus, Search, 
-  Eye, Edit, Trash2, Users, ChevronLeft, ChevronRight 
-} from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
-export default function AdminTeamsList() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10 
+export default function AdminTeamsPage() {
+  const router = useRouter()
 
-  const teams = Object.values(MOCK_TEAMS)
-  const filteredTeams = teams.filter((team) => 
-    team.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const totalPages = Math.ceil(filteredTeams.length / itemsPerPage)
-  const paginatedTeams = filteredTeams.slice(
-    (currentPage - 1) * itemsPerPage, 
-    currentPage * itemsPerPage
-  )
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+  // --- CONFIGURACIÓN DE COLUMNAS ---
+  const columns = [
+    { 
+      header: "IDENTIDAD / FRANQUICIA", 
+      key: "name", 
+      render: (team: any) => (
+        <div className="flex items-center gap-4 group">
+          <Avatar className="h-10 w-10 border-2 border-primary/20 rounded-none transform -skew-x-12 overflow-hidden bg-background shadow-[4px_4px_0px_0px_rgba(var(--primary),0.1)]">
+            <AvatarImage src={team.logoUrl} className="object-cover" />
+            <AvatarFallback className="font-black text-primary uppercase skew-x-12">
+              {team.name[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col text-left">
+            <span className="font-black italic uppercase text-sm leading-none mb-1 group-hover:text-primary transition-colors tracking-tight">
+              {team.name}
+            </span>
+            <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">
+              ID: {team.id.substring(0, 8)}...
+            </span>
+          </div>
+        </div>
+      )
+    },
+    { 
+      header: "ESTADO", 
+      key: "active", 
+      render: (team: any) => <CoreStatusBadge active={team.active} /> 
+    },
+    { 
+      header: "EA SPORTS ID", 
+      key: "clubIdEa",
+      render: (team: any) => (
+        <div className="flex flex-col items-center">
+          <span className="text-[11px] font-black text-primary uppercase italic tracking-widest bg-primary/5 px-3 py-1 border border-primary/10">
+            {team.clubIdEa || "SIN VINCULAR"}
+          </span>
+        </div>
+      )
+    }
+  ]
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500 pb-12">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12 pt-6 px-4">
       
-      {/* 1. BOTÓN VOLVER - Sin texto pequeño hardcodeado */}
+      {/* --- NAVEGACIÓN --- */}
       <Link href="/admin">
-        <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-primary font-black uppercase tracking-widest px-0 mb-2">
+        <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-primary font-black text-[10px] uppercase px-0 mb-2 transition-all hover:translate-x-1">
           <ChevronLeft className="h-4 w-4" />
-          Volver al Dashboard Root
+          volver al panel de control
         </Button>
       </Link>
 
-      {/* 2. CABECERA - Eliminadas opacidades /50 o /20 */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary rounded-[var(--radius)]">
-            <ShieldCheck className="h-8 w-8 text-primary-foreground" />
+      {/* --- CABECERA DE IMPACTO --- */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-4 border-primary pb-8">
+        <div className="flex items-center gap-6">
+          <div className="p-4 bg-primary/10 border-2 border-primary/20 transform -skew-x-12 shrink-0">
+            <Trophy className="h-10 w-10 text-primary skew-x-12" />
           </div>
           <div>
-            <h1 className="font-black uppercase italic tracking-tighter">
-              Directorio de <span className="text-primary">Clubes</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">
+              ADMINISTRACIÓN DE FRANQUICIAS
+            </span>
+            <h1 className="text-5xl md:text-6xl font-black uppercase italic tracking-tighter leading-none mt-1">
+              DIRECTORIO DE <span className="text-primary">CLUBES</span>
             </h1>
-            <p className="text-muted-foreground font-medium mt-1 uppercase italic">
-              Gestiona las organizaciones y accede a sus plantillas.
+            <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest mt-2 opacity-70">
+              GESTIÓN DE IDENTIDAD COLECTIVA Y ESTADO DE COMPETICIÓN
             </p>
           </div>
         </div>
-        
-        <Button className="font-black italic uppercase tracking-widest bg-primary text-primary-foreground shadow-lg rounded-[var(--radius)]">
-          <Plus className="mr-2 h-4 w-4" />
-          Registrar Club
-        </Button>
-      </div>
 
-      {/* 3. BARRA DE BÚSQUEDA - Radio dinámico y sin px fijos */}
-      <div className="bg-card p-4 rounded-[var(--radius)] border border-border shadow-sm flex items-center">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Buscar club por nombre..." 
-            className="pl-9 bg-background border-border italic placeholder:not-italic font-medium rounded-[var(--radius)]"
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
+        <div className="hidden lg:block">
+          <div className="bg-primary/5 p-3 border-l-2 border-primary italic">
+             <p className="text-[9px] font-black uppercase tracking-widest text-primary">
+               SERVIDOR: <span className="text-foreground">ONLINE</span>
+             </p>
+          </div>
         </div>
       </div>
 
-      {/* 4. TABLA - Limpieza total de modificadores manuales */}
-      <div className="rounded-[var(--radius)] border border-border bg-card overflow-hidden shadow-xl flex flex-col">
-        <Table>
-          <TableHeader className="bg-secondary">
-            <TableRow className="border-border">
-              <TableHead className="w-[350px] font-black uppercase tracking-widest text-muted-foreground">Organización</TableHead>
-              <TableHead className="font-black uppercase tracking-widest text-center text-muted-foreground">Plantilla</TableHead>
-              <TableHead className="font-black uppercase tracking-widest text-center text-muted-foreground">Estado</TableHead>
-              <TableHead className="w-[80px] text-right font-black uppercase tracking-widest text-muted-foreground">Acciones</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedTeams.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground font-medium italic uppercase">
-                  No se encontraron clubes registrados.
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedTeams.map((team) => (
-                <TableRow key={team.id} className="hover:bg-secondary border-border transition-colors">
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <img 
-                          src={team.logo} alt={team.name} 
-                          className="w-12 h-12 rounded-[calc(var(--radius)-4px)] bg-background border border-border relative z-10 p-1 object-contain" 
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-black italic uppercase tracking-tight text-foreground">{team.name}</span>
-                        <span className="text-muted-foreground uppercase font-black tracking-widest">ID: {team.id}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-
-                  <TableCell className="text-center">
-                    <Badge variant="secondary" className="font-black px-3 py-1 text-foreground border border-border">
-                      <Users className="mr-2 h-3.5 w-3.5 text-primary" />
-                      {team.players.length} / 11
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell className="text-center">
-                    <Badge variant="outline" className="uppercase font-black text-primary border-primary bg-primary/10">
-                      Verificado
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="hover:bg-secondary hover:text-primary transition-colors">
-                          <MoreHorizontal className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-[calc(var(--radius)-2px)]">
-                        <DropdownMenuLabel className="font-black uppercase tracking-widest text-muted-foreground">Opciones</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild className="cursor-pointer font-black uppercase tracking-wider">
-                          <Link href={`/admin/teams/${team.name}`} className="w-full flex items-center">
-                            <Eye className="mr-2 h-4 w-4 text-primary" /> Ver Roster
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer font-black uppercase tracking-wider">
-                          <Edit className="mr-2 h-4 w-4 text-foreground" /> Editar Perfil
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer font-black uppercase tracking-wider text-destructive focus:bg-destructive focus:text-destructive-foreground">
-                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar Club
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-
-        {/* 5. PAGINACIÓN - Controlada por variables globales */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-secondary">
-            <div className="hidden sm:block text-muted-foreground font-black uppercase tracking-widest">
-              Mostrando {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredTeams.length)} de {filteredTeams.length}
-            </div>
-            
-            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-              <Button
-                variant="outline"
-                className="font-black uppercase tracking-widest rounded-[calc(var(--radius)-4px)]"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              
-              <div className="font-black text-foreground uppercase tracking-widest">
-                {currentPage} / {totalPages}
-              </div>
-              
-              <Button
-                variant="outline"
-                className="font-black uppercase tracking-widest rounded-[calc(var(--radius)-4px)]"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
+      {/* --- EL NÚCLEO OPERATIVO --- */}
+      <div className="relative">
+        <CoreTable
+          title="Gestión de Clubes"
+          entityName="Franquicia"
+          service={{
+            get: (inactive) => teamService.getTeams(inactive),
+            delete: (id) => teamService.deleteTeam(id),
+            restore: (id) => teamService.restoreTeam(id)
+          }}
+          columns={columns}
+          formComponent={TeamForm}
+          primaryActionLabel="REGISTRAR CLUB"
+          onViewDetails={(team) => {
+            // IMPORTANTE: Enviamos el NAME para la URL, no el ID
+            const teamSlug = encodeURIComponent(team.name);
+            router.push(`/admin/teams/${teamSlug}`);
+          }}
+        />
       </div>
+
+      {/* --- SEGURIDAD Y ALERTAS --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 bg-primary/5 border-l-4 border-primary flex items-center gap-4">
+          <ShieldAlert className="h-6 w-6 text-primary shrink-0" />
+          <div>
+            <p className="text-[10px] text-primary font-black uppercase italic leading-tight tracking-widest">
+              PROTOCOLOS DE CLUB ACTIVOS
+            </p>
+            <p className="text-[9px] text-muted-foreground font-bold uppercase mt-1 leading-relaxed">
+              CUALQUIER MODIFICACIÓN EN EL NOMBRE O TAG AFECTARÁ LA INTEGRIDAD DE LAS ESTADÍSTICAS HISTÓRICAS DEL NÚCLEO.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-4 bg-secondary/10 border-l-4 border-secondary flex items-center gap-4 opacity-50">
+          <Zap className="h-6 w-6 text-secondary shrink-0" />
+          <div className="text-[10px] font-black uppercase italic tracking-widest leading-tight text-foreground">
+            SISTEMA OPERATIVO: <span className="text-primary uppercase font-black">ACTIVE SYNC</span>
+            <p className="text-[9px] font-bold mt-1 uppercase italic tracking-tighter">
+              PRISMA CLIENT v6.19.3 // TOURNEYOS CORE
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* --- FOOTER --- */}
+      <footer className="pt-8 border-t border-border/40 text-center">
+        <p className="text-[9px] font-black uppercase tracking-[0.6em] text-muted-foreground/40 italic">
+          TOURNEYOS OPERATING SYSTEM // SEBASTIAN ACCESS
+        </p>
+      </footer>
     </div>
   )
 }
